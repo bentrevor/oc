@@ -167,6 +167,7 @@ spec = do
 
         it "resets the checkbox mark to a space" $ do
           isChecked (habitCB (nextHabit breakfastHabit)) `shouldBe` False
+          any (isChecked . habitCB) (habits orgMonday) `shouldBe` False
 
   context "converting OrgDay back into string" $ do
     it "can be converted into a string" $ do

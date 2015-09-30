@@ -21,3 +21,7 @@ splitOn :: Char -> String -> [String]
 splitOn char str
   | elem char str = (strBefore char str) : (splitOn char $ strAfter char str)
   | otherwise     = [str]
+
+stripWhitespace :: String -> String
+stripWhitespace s = reverse $ dropSpaces $ reverse $ dropSpaces s
+  where dropSpaces = dropWhile (== ' ')

@@ -95,12 +95,12 @@ strToTodo str = Todo { todoCB = strToCheckbox str
                      , todoStart = startTime
                      , todoEnd = endTime
                      }
-  where details = parseDetails str
-        (startTime, endTime) = case (hasDetails str, numDashes details) of
+  where (startTime, endTime) = case (hasDetails str, numDashes details) of
                                 (False, _) -> (Nothing, Nothing)
                                 (_, 0)     -> (Just (strToMilTime details), Nothing)
                                 (_, 1)     -> (Just (milTimeRangeStart details), Just (milTimeRangeEnd details))
                                 (_, _)     -> error "shouldn't get here"
+        details = parseDetails str
         numDashes s = length $ filter (=='-') s
 
 getDesc :: Todo -> Maybe String
@@ -108,11 +108,11 @@ getDesc todo = case (todoStart todo, todoEnd todo) of
                 (Nothing, Nothing) -> Nothing
                 (Just t, Nothing) -> Just (show t)
                 (Just t1, Just t2) -> Just (show t1 ++ "-" ++ show t2)
-                (Nothing, Just _) -> error "shouldn't happen"
+                (Nothing, Just _) -> error "shouldn't have an end time without a start time"
 
 showCheckboxLine :: Checkbox -> Maybe Int -> Maybe String -> String
 showCheckboxLine checkbox streak desc = (addDesc . addStreak) checkboxLine
-  where checkboxLine = unwords ["  -", "[" ++ maybeX ++ "]", (heading checkbox)]
+  where checkboxLine = unwords ["  -", "[" ++ maybeX ++ "]", heading checkbox]
         maybeX = checkboxMark checkbox
         addStreak = case streak of
                      Nothing -> id

@@ -67,7 +67,7 @@ parseProperty p day = case find (\line -> isPrefixOf (property p) line) (lines d
 
 parsePropertyList :: String -> String -> [String]
 parsePropertyList p day = case find (\line -> isPrefixOf (property p) line) (lines day) of
-                           Just str -> linesUntilNextProperty p day
+                           Just _ -> linesUntilNextProperty p day
                            Nothing -> []
 
 linesUntilNextProperty :: String -> String -> [String]
@@ -166,12 +166,15 @@ instance Show Day where
 \:DRINKS: " ++ showMilTimes (drinks day) ++ "\n\
 \:NOTES: " ++ (notes day)
 
+showWithCommas :: Show a => [a] -> String
+showWithCommas [] = "_"
+showWithCommas xs = intercalate "," (map show xs)
+
 showMoods :: [Mood] -> String
-showMoods ms = intercalate "," (map show ms)
+showMoods = showWithCommas
 
 showMilTimes :: [MilTime] -> String
-showMilTimes [] = "_"
-showMilTimes times = intercalate "," (map show times)
+showMilTimes = showWithCommas
 
 nextDay :: Day -> Day
 nextDay day = day { date = Cal.addDays 1 (date day)
@@ -179,6 +182,7 @@ nextDay day = day { date = Cal.addDays 1 (date day)
                   , coffee = []
                   , drinks = []
                   , notes = "_"
+                  , habits = map nextHabit (habits day)
                   }
 
 newStreak :: Habit -> Int
