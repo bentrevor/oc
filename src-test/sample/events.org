@@ -1,0 +1,4 @@
+* <2015-09-10 Thu 18:00> something in the past
+* <2015-09-13 Sun 18:00> phone call
+* <2015-09-13 Sun 14:00>--<2015-09-13 Sun 16:00> meeting
+* <2015-09-16 Wed 18:00> something in the future

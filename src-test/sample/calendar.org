@@ -1,0 +1,22 @@
+* September
+** [1/2] bills
+  - [X] rent {15}
+  - [ ] car {25}
+
+** <2015-09-13 Sun>-<2015-09-20 Sun>
+*** [3/5] <2015-09-13 Sun>
+:MOOD: 8(07:45),7(12:15),8(22:00)
+:COFFEE: 08:00,09:00
+:DRINKS: 20:00
+:NOTES: good day
+
+:TODO: _
+  - [X] do something
+:CALENDAR: _
+  - meeting {14:00-15:00}
+  - phone call {18:00}
+:HABITS: _
+  - [X] (-2) breakfast {yummy}
+  - [ ] (-1) lunch
+  - [X] (1) dinner
+  - [ ] (2) dessert
