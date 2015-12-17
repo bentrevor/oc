@@ -23,6 +23,10 @@ sundayTodo = Todo { todoCB = Checkbox { isChecked = True, heading = "do somethin
             , todoStart = Nothing, todoEnd = Nothing
             }
 
+unfinishedSundayTodo = Todo { todoCB = Checkbox { isChecked = False, heading = "another thing to do" }
+                            , todoStart = Nothing, todoEnd = Nothing
+                            }
+
 breakfastHabit = Habit { habitCB = Checkbox { isChecked = True, heading = "breakfast" }
                        , streak = -2, details = "yummy"
                        }
@@ -49,8 +53,9 @@ orgSunday = Day { date = sunday
                 , mood = [Mood (8, strToMilTime "07:45"), Mood (7, strToMilTime "12:15"), Mood (8, strToMilTime "22:00")]
                 , coffee = [strToMilTime "08:00", strToMilTime "09:00"]
                 , drinks = [strToMilTime "20:00"]
-                , notes = "good day"
-                , todos = [sundayTodo]
+                , pre = "good morning"
+                , post = "good night"
+                , todos = [sundayTodo, unfinishedSundayTodo]
                 , calendar = [event, endlessEvent]
                 , habits = sundayHabits
                 }
@@ -68,14 +73,16 @@ orgFileString = unlines [
   ]
 
 sundayString = unlines $ [
-    "*** [3/5] <2015-09-13 Sun>"
+    "*** [3/6] <2015-09-13 Sun>"
   , ":MOOD: 8(07:45),7(12:15),8(22:00)"
   , ":COFFEE: 08:00,09:00"
   , ":DRINKS: 20:00"
-  , ":NOTES: good day"
+  , ":PRE: good morning"
+  , ":POST: good night"
   , ""
   , ":TODO: _"
   , show sundayTodo
+  , show unfinishedSundayTodo
   , ":CALENDAR: _"
   , show event
   , show endlessEvent
@@ -104,7 +111,7 @@ spec = do
         parseProperty "bogus" sundayString `shouldBe` ""
 
       it "can get the list of strings for multiline properties" $ do
-        parsePropertyList "todo" sundayString `shouldBe` [show sundayTodo]
+        parsePropertyList "todo" sundayString `shouldBe` [show sundayTodo, show unfinishedSundayTodo]
         parsePropertyList "calendar" sundayString `shouldBe` [show event, show endlessEvent]
         parsePropertyList "habits" sundayString `shouldBe` map show sundayHabits
 
@@ -124,13 +131,14 @@ spec = do
           parseCoffee sundayString `shouldBe` [MilTime { hours = 8, minutes = 0 }, MilTime { hours = 9, minutes = 0 }]
           parseDrinks sundayString `shouldBe` [MilTime { hours = 20, minutes = 0 }]
 
-      describe "notes" $ do
+      describe "pre/post" $ do
         it "is just a string" $ do
-          parseProperty "notes" sundayString `shouldBe` "good day"
+          parseProperty "pre" sundayString `shouldBe` "good morning"
+          parseProperty "post" sundayString `shouldBe` "good night"
 
       describe "todos" $ do
         it "is a list of Checkboxes" $ do
-          parseTodos sundayString `shouldBe` [sundayTodo]
+          parseTodos sundayString `shouldBe` [sundayTodo, unfinishedSundayTodo]
 
       describe "calendar" $ do
         it "is a list of Events" $ do
@@ -149,11 +157,14 @@ spec = do
         mood orgMonday `shouldBe` []
         coffee orgMonday `shouldBe` []
         drinks orgMonday `shouldBe` []
-        notes orgMonday `shouldBe` "_"
+        pre orgMonday `shouldBe` "_"
+        post orgMonday `shouldBe` "_"
 
-      it "keeps the todos and events from yesterday" $ do
-        todos orgMonday `shouldBe` todos orgSunday
+      it "keeps the events from yesterday" $ do
         calendar orgMonday `shouldBe` calendar orgSunday
+
+      it "keeps incomplete todos from yesterday" $ do
+        todos orgMonday `shouldBe` [unfinishedSundayTodo]
 
       describe "updating habits" $ do
         it "clears the details" $ do

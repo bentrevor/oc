@@ -50,7 +50,8 @@ data Day = Day { date :: Cal.Day
                , mood :: [Mood]
                , coffee :: [MilTime]
                , drinks :: [MilTime]
-               , notes :: String
+               , pre :: String
+               , post :: String
                , todos :: [Todo]
                , calendar :: [Event]
                , habits :: [Habit]
@@ -84,8 +85,11 @@ parseDate s = Cal.fromGregorian y m d
 parseDrinks :: String -> [MilTime]
 parseDrinks day = strToMilTimes $ parseProperty "drinks" day
 
-parseNotes :: String -> String
-parseNotes = parseProperty "notes"
+parsePre :: String -> String
+parsePre = parseProperty "pre"
+
+parsePost :: String -> String
+parsePost = parseProperty "post"
 
 parseCoffee :: String -> [MilTime]
 parseCoffee day = strToMilTimes $ parseProperty "coffee" day
@@ -98,10 +102,10 @@ parseHabits :: String -> [Habit]
 parseHabits day = map strToHabit $ parsePropertyList "habits" day
 
 parseTodos :: String -> [Todo]
-parseTodos dayStr = map strToTodo $ parsePropertyList "todo" dayStr
+parseTodos day = map strToTodo $ parsePropertyList "todo" day
 
 parseCalendar :: String -> [Event]
-parseCalendar dayStr = map strToEvent $ parsePropertyList "calendar" dayStr
+parseCalendar day = map strToEvent $ parsePropertyList "calendar" day
 
 coffeeFromStr :: String -> [MilTime]
 coffeeFromStr str = case str of
@@ -121,7 +125,8 @@ strToDay dayStr = Day { date = parseDate $ head $ lines dayStr
                       , mood = parseMood dayStr
                       , coffee = parseCoffee dayStr
                       , drinks = parseDrinks dayStr
-                      , notes = parseNotes dayStr
+                      , pre = parsePre dayStr
+                      , post = parsePost dayStr
                       , todos = parseTodos dayStr
                       , calendar = parseCalendar dayStr
                       , habits = parseHabits dayStr
@@ -164,7 +169,8 @@ instance Show Day where
 \:MOOD: " ++ showMoods (mood day) ++ "\n\
 \:COFFEE: " ++ showMilTimes (coffee day) ++ "\n\
 \:DRINKS: " ++ showMilTimes (drinks day) ++ "\n\
-\:NOTES: " ++ (notes day)
+\:PRE: " ++ (pre day) ++ "\n\
+\:POST: " ++ (post day)
 
 showWithCommas :: Show a => [a] -> String
 showWithCommas [] = "_"
@@ -181,9 +187,12 @@ nextDay day = day { date = Cal.addDays 1 (date day)
                   , mood = []
                   , coffee = []
                   , drinks = []
-                  , notes = "_"
+                  , pre = "_"
+                  , post = "_"
+                  , todos = filter unfinishedTodo (todos day)
                   , habits = map nextHabit (habits day)
                   }
+  where unfinishedTodo t = (not . isChecked) (todoCB t)
 
 newStreak :: Habit -> Int
 newStreak h
@@ -193,8 +202,7 @@ newStreak h
         s = streak h
 
 nextHabit :: Habit -> Habit
-nextHabit habit = habit { habitCB = Checkbox { isChecked = False, heading = habitHeading
-                             }
+nextHabit habit = habit { habitCB = Checkbox { isChecked = False, heading = habitHeading }
                         , streak = newStreak habit, details = ""
                         }
   where habitHeading = heading (habitCB habit)
