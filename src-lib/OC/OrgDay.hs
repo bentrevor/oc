@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances,OverlappingInstances #-}
--- TODO get rid of OverlappingInstances
+-- TODO figure out what OverlappingInstances is
 
 module OC.OrgDay where
 
@@ -48,8 +48,6 @@ instance Show Mood where
 
 data Day = Day { date :: Cal.Day
                , mood :: [Mood]
-               , coffee :: [MilTime]
-               , drinks :: [MilTime]
                , pre :: String
                , post :: String
                , todos :: [Todo]
@@ -82,17 +80,11 @@ parseDate s = Cal.fromGregorian y m d
         m = read $ wholeDate !! 1
         d = read $ wholeDate !! 2
 
-parseDrinks :: String -> [MilTime]
-parseDrinks day = strToMilTimes $ parseProperty "drinks" day
-
 parsePre :: String -> String
 parsePre = parseProperty "pre"
 
 parsePost :: String -> String
 parsePost = parseProperty "post"
-
-parseCoffee :: String -> [MilTime]
-parseCoffee day = strToMilTimes $ parseProperty "coffee" day
 
 parseMood :: String -> [Mood]
 parseMood day = map moodFromStr moodStrs
@@ -107,14 +99,6 @@ parseTodos day = map strToTodo $ parsePropertyList "todo" day
 parseCalendar :: String -> [Event]
 parseCalendar day = map strToEvent $ parsePropertyList "calendar" day
 
-coffeeFromStr :: String -> [MilTime]
-coffeeFromStr str = case str of
-                     "_" -> []
-                     _ -> strToMilTimes str
-
-drinksFromStr :: String -> [MilTime]
-drinksFromStr = coffeeFromStr
-
 moodFromStr :: String -> Mood
 moodFromStr str = Mood (int, time)
   where int = read $ strBefore '(' str
@@ -123,8 +107,6 @@ moodFromStr str = Mood (int, time)
 strToDay :: String -> Day
 strToDay dayStr = Day { date = parseDate $ head $ lines dayStr
                       , mood = parseMood dayStr
-                      , coffee = parseCoffee dayStr
-                      , drinks = parseDrinks dayStr
                       , pre = parsePre dayStr
                       , post = parsePost dayStr
                       , todos = parseTodos dayStr
@@ -167,8 +149,6 @@ instance Show Day where
           weekDay (_,_,d) = d
           properties = "\
 \:MOOD: " ++ showMoods (mood day) ++ "\n\
-\:COFFEE: " ++ showMilTimes (coffee day) ++ "\n\
-\:DRINKS: " ++ showMilTimes (drinks day) ++ "\n\
 \:PRE: " ++ (pre day) ++ "\n\
 \:POST: " ++ (post day)
 
@@ -185,8 +165,6 @@ showMilTimes = showWithCommas
 nextDay :: Day -> Day
 nextDay day = day { date = Cal.addDays 1 (date day)
                   , mood = []
-                  , coffee = []
-                  , drinks = []
                   , pre = "_"
                   , post = "_"
                   , todos = filter unfinishedTodo (todos day)
@@ -202,10 +180,10 @@ newStreak h
         s = streak h
 
 nextHabit :: Habit -> Habit
-nextHabit habit = habit { habitCB = Checkbox { isChecked = False, heading = habitHeading }
+nextHabit habit = habit { habitCB = Checkbox { isChecked = False, description = habitDesc }
                         , streak = newStreak habit, details = ""
                         }
-  where habitHeading = heading (habitCB habit)
+  where habitDesc = description (habitCB habit)
 
 nextDayStr :: String -> String
 nextDayStr = show . nextDay . strToDay

@@ -6,9 +6,8 @@
 ** <2015-09-13 Sun>-<2015-09-20 Sun>
 *** [3/5] <2015-09-13 Sun>
 :MOOD: 8(07:45),7(12:15),8(22:00)
-:COFFEE: 08:00,09:00
-:DRINKS: 20:00
-:NOTES: good day
+:PRE: Hopefully going to be a good day.
+:POST: Pretty good day.
 
 :TODO: _
   - [X] do something

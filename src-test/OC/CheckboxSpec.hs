@@ -6,39 +6,38 @@ import Test.Hspec
 main :: IO ()
 main = hspec spec
 
-habitA = Habit { habitCB = Checkbox { heading = "habit A" , isChecked = True }
+habitA = Habit { habitCB = Checkbox { description = "habit A" , isChecked = True }
                , streak = (2)
                , details = ""
                }
 
-habitB = Habit { habitCB = Checkbox { heading = "habit B" , isChecked = False }
+habitB = Habit { habitCB = Checkbox { description = "habit B" , isChecked = False }
                , streak = (-2)
                , details = "habit details"
                }
 
-todoA = Todo { todoCB = Checkbox { heading = "todo A", isChecked = True }
+todoA = Todo { todoCB = Checkbox { description = "todo A", isChecked = True }
              , todoStart = Nothing
              , todoEnd = Nothing
              }
 
-todoB = Todo { todoCB = Checkbox { heading = "todo B", isChecked = True }
+todoB = Todo { todoCB = Checkbox { description = "todo B", isChecked = True }
              , todoStart = Just MilTime { hours = 8, minutes = 0 }
              , todoEnd = Nothing
              }
 
-
-todoC = Todo { todoCB = Checkbox { heading = "todo C", isChecked = False }
+todoC = Todo { todoCB = Checkbox { description = "todo C", isChecked = False }
              , todoStart = Just MilTime { hours = 14, minutes = 0 }
              , todoEnd = Just MilTime { hours = 15, minutes = 30 }
              }
 
-billA = Bill { billCB = Checkbox { heading = "bill A"
+billA = Bill { billCB = Checkbox { description = "bill A"
                                  , isChecked = True
                                  }
              , dueDate = 15
              }
 
-billB = Bill { billCB = Checkbox { heading = "bill B"
+billB = Bill { billCB = Checkbox { description = "bill B"
                                  , isChecked = False
                                  }
              , dueDate = 20
@@ -60,20 +59,20 @@ spec = do
 
   describe "Checkbox" $ do
     it "can be shown" $ do
-      show Checkbox { heading = "checkbox heading", isChecked = False } `shouldBe` "  - [ ] checkbox heading"
-      show Checkbox { heading = "checkbox heading", isChecked = True } `shouldBe` "  - [X] checkbox heading"
+      show Checkbox { description = "checkbox heading", isChecked = False } `shouldBe` "  - [ ] checkbox heading"
+      show Checkbox { description = "checkbox heading", isChecked = True } `shouldBe` "  - [X] checkbox heading"
 
     it "showCheckboxLine" $ do
-      showCheckboxLine (Checkbox { heading = "checkbox heading", isChecked = True }) Nothing Nothing `shouldBe` "  - [X] checkbox heading"
-      showCheckboxLine (Checkbox { heading = "checkbox heading", isChecked = False }) (Just 1) Nothing `shouldBe` "  - [ ] (1) checkbox heading"
-      showCheckboxLine (Checkbox { heading = "checkbox heading", isChecked = True }) Nothing (Just "asdf") `shouldBe` "  - [X] checkbox heading {asdf}"
-      showCheckboxLine (Checkbox { heading = "checkbox heading", isChecked = True }) (Just (-5)) (Just "asdf") `shouldBe` "  - [X] (-5) checkbox heading {asdf}"
+      showCheckboxLine (Checkbox { description = "checkbox heading", isChecked = True }) Nothing Nothing `shouldBe` "  - [X] checkbox heading"
+      showCheckboxLine (Checkbox { description = "checkbox heading", isChecked = False }) (Just 1) Nothing `shouldBe` "  - [ ] (1) checkbox heading"
+      showCheckboxLine (Checkbox { description = "checkbox heading", isChecked = True }) Nothing (Just "asdf") `shouldBe` "  - [X] checkbox heading {asdf}"
+      showCheckboxLine (Checkbox { description = "checkbox heading", isChecked = True }) (Just (-5)) (Just "asdf") `shouldBe` "  - [X] (-5) checkbox heading {asdf}"
 
     it "can be built from a string" $ do
-      heading (strToCheckbox "  - [ ] (1) habit name") `shouldBe` "habit name"
-      heading (strToCheckbox "  - [ ] (1) habit name {with details}") `shouldBe` "habit name"
-      strToCheckbox "  - [ ] (1) habit name {with details}" `shouldBe` Checkbox { heading = "habit name", isChecked = False }
-      strToCheckbox "  - [X] habit name" `shouldBe` Checkbox { heading = "habit name", isChecked = True }
+      description (strToCheckbox "  - [ ] (1) habit name") `shouldBe` "habit name"
+      description (strToCheckbox "  - [ ] (1) habit name {with details}") `shouldBe` "habit name"
+      strToCheckbox "  - [ ] (1) habit name {with details}" `shouldBe` Checkbox { description = "habit name", isChecked = False }
+      strToCheckbox "  - [X] habit name" `shouldBe` Checkbox { description = "habit name", isChecked = True }
 
   describe "types of checkboxes" $ do
     describe "Habit" $ do

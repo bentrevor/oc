@@ -19,26 +19,26 @@ endlessEvent = Event { name = "some event"
               , endTime = Nothing
               }
 
-sundayTodo = Todo { todoCB = Checkbox { isChecked = True, heading = "do something" }
+sundayTodo = Todo { todoCB = Checkbox { isChecked = True, description = "do something" }
             , todoStart = Nothing, todoEnd = Nothing
             }
 
-unfinishedSundayTodo = Todo { todoCB = Checkbox { isChecked = False, heading = "another thing to do" }
+unfinishedSundayTodo = Todo { todoCB = Checkbox { isChecked = False, description = "another thing to do" }
                             , todoStart = Nothing, todoEnd = Nothing
                             }
 
-breakfastHabit = Habit { habitCB = Checkbox { isChecked = True, heading = "breakfast" }
+breakfastHabit = Habit { habitCB = Checkbox { isChecked = True, description = "breakfast" }
                        , streak = -2, details = "yummy"
                        }
 
 sundayHabits = [ breakfastHabit
-               , Habit { habitCB = Checkbox { isChecked = False, heading = "lunch" }
+               , Habit { habitCB = Checkbox { isChecked = False, description = "lunch" }
                        , streak = -1, details = ""
                        }
-               , Habit { habitCB = Checkbox { isChecked = True, heading = "dinner" }
+               , Habit { habitCB = Checkbox { isChecked = True, description = "dinner" }
                        , streak = 1, details = ""
                        }
-               , Habit { habitCB = Checkbox { isChecked = False, heading = "dessert" }
+               , Habit { habitCB = Checkbox { isChecked = False, description = "dessert" }
                        , streak = 2, details = ""
                        }
                ]
@@ -51,8 +51,6 @@ monday = Cal.fromGregorian 2015 9 14
 
 orgSunday = Day { date = sunday
                 , mood = [Mood (8, strToMilTime "07:45"), Mood (7, strToMilTime "12:15"), Mood (8, strToMilTime "22:00")]
-                , coffee = [strToMilTime "08:00", strToMilTime "09:00"]
-                , drinks = [strToMilTime "20:00"]
                 , pre = "good morning"
                 , post = "good night"
                 , todos = [sundayTodo, unfinishedSundayTodo]
@@ -75,8 +73,6 @@ orgFileString = unlines [
 sundayString = unlines $ [
     "*** [3/6] <2015-09-13 Sun>"
   , ":MOOD: 8(07:45),7(12:15),8(22:00)"
-  , ":COFFEE: 08:00,09:00"
-  , ":DRINKS: 20:00"
   , ":PRE: good morning"
   , ":POST: good night"
   , ""
@@ -126,11 +122,6 @@ spec = do
                                             , Mood (8, MilTime { hours = 22, minutes = 0 })
                                             ]
 
-      describe "coffee/drinks" $ do
-        it "is a list of times" $ do
-          parseCoffee sundayString `shouldBe` [MilTime { hours = 8, minutes = 0 }, MilTime { hours = 9, minutes = 0 }]
-          parseDrinks sundayString `shouldBe` [MilTime { hours = 20, minutes = 0 }]
-
       describe "pre/post" $ do
         it "is just a string" $ do
           parseProperty "pre" sundayString `shouldBe` "good morning"
@@ -155,8 +146,6 @@ spec = do
 
       it "has empty properties" $ do
         mood orgMonday `shouldBe` []
-        coffee orgMonday `shouldBe` []
-        drinks orgMonday `shouldBe` []
         pre orgMonday `shouldBe` "_"
         post orgMonday `shouldBe` "_"
 

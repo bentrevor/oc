@@ -17,12 +17,12 @@ instance Show MilTime where
             | otherwise = show t
 
 data Checkbox = Checkbox { isChecked :: Bool
-                         , heading :: String
+                         , description :: String
                          }
               deriving (Eq)
 
 instance Show Checkbox where
-  show checkbox = "  - [" ++ (checkboxMark checkbox) ++ "] " ++ (heading checkbox)
+  show checkbox = "  - [" ++ (checkboxMark checkbox) ++ "] " ++ (description checkbox)
 
 data Habit = Habit { habitCB :: Checkbox
                    , streak :: Int
@@ -69,13 +69,13 @@ milTimeRangeEnd :: String -> MilTime
 milTimeRangeEnd str = strToMilTime (splitOn '-' str !! 1)
 
 strToCheckbox :: String -> Checkbox
-strToCheckbox str = Checkbox { heading = stripWhitespace cbHeading
+strToCheckbox str = Checkbox { description = stripWhitespace cbDesc
                              , isChecked = parseCheckboxChar str == 'X'
                              }
-  where cbHeading
-          | hasDetails str = strBetween headingStart '{' str
-          | otherwise      = strAfter headingStart str
-        headingStart = if hasStreak str then ')' else ']'
+  where cbDesc
+          | hasDetails str = strBetween descStart '{' str
+          | otherwise      = strAfter descStart str
+        descStart = if hasStreak str then ')' else ']'
         stripWhitespace s = reverse $ dropSpaces $ reverse $ dropSpaces s
         dropSpaces = dropWhile (== ' ')
 
@@ -112,7 +112,7 @@ getDesc todo = case (todoStart todo, todoEnd todo) of
 
 showCheckboxLine :: Checkbox -> Maybe Int -> Maybe String -> String
 showCheckboxLine checkbox streak desc = (addDesc . addStreak) checkboxLine
-  where checkboxLine = unwords ["  -", "[" ++ maybeX ++ "]", heading checkbox]
+  where checkboxLine = unwords ["  -", "[" ++ maybeX ++ "]", description checkbox]
         maybeX = checkboxMark checkbox
         addStreak = case streak of
                      Nothing -> id
