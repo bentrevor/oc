@@ -41,10 +41,10 @@ strToEvent str = Event { name = init $ strBefore '{' $ drop 4 str
                         Nothing -> (strToMilTime timeStr, Nothing)
                         Just _ -> (strToMilTime (take 5 timeStr), Just (strToMilTime (drop 6 timeStr)))
 
-data Mood = Mood (Int, MilTime) deriving (Eq)
+data Mood = Mood (Int, MilTime, String) deriving (Eq)
 
 instance Show Mood where
-  show (Mood (i, time)) = show i ++ "(" ++ show time ++ ")"
+  show (Mood (i, time, desc)) = show i ++ "(" ++ show time ++ "__" ++ desc ++ ")"
 
 data Day = Day { date :: Cal.Day
                , mood :: [Mood]
@@ -59,6 +59,7 @@ data Day = Day { date :: Cal.Day
 property :: String -> String
 property p = ":" ++ map toUpper p ++ ":"
 
+-- this should return a Maybe String (for bogus input)
 parseProperty :: String -> String -> String
 parseProperty p day = case find (\line -> isPrefixOf (property p) line) (lines day) of
                        Just str -> strAfter ' ' str
@@ -88,7 +89,7 @@ parsePost = parseProperty "post"
 
 parseMood :: String -> [Mood]
 parseMood day = map moodFromStr moodStrs
-  where moodStrs = splitOn ',' $ parseProperty "mood" day
+  where moodStrs = splitOn ';' $ parseProperty "mood" day
 
 parseHabits :: String -> [Habit]
 parseHabits day = map strToHabit $ parsePropertyList "habits" day
@@ -99,10 +100,12 @@ parseTodos day = map strToTodo $ parsePropertyList "todo" day
 parseCalendar :: String -> [Event]
 parseCalendar day = map strToEvent $ parsePropertyList "calendar" day
 
+-- ugly, but I'm going to rewrite these using a real parser eventually
 moodFromStr :: String -> Mood
-moodFromStr str = Mood (int, time)
+moodFromStr str = Mood (int, time, desc)
   where int = read $ strBefore '(' str
-        time = strToMilTime $ strBetween '(' ')' str
+        time = strToMilTime $ strBefore '_' $ strBetween '(' ')' str
+        desc = strAfter '_' $ strAfter '_' $ strBetween '(' ')' str
 
 strToDay :: String -> Day
 strToDay dayStr = Day { date = parseDate $ head $ lines dayStr
@@ -152,15 +155,8 @@ instance Show Day where
 \:PRE: " ++ (pre day) ++ "\n\
 \:POST: " ++ (post day)
 
-showWithCommas :: Show a => [a] -> String
-showWithCommas [] = "_"
-showWithCommas xs = intercalate "," (map show xs)
-
 showMoods :: [Mood] -> String
-showMoods = showWithCommas
-
-showMilTimes :: [MilTime] -> String
-showMilTimes = showWithCommas
+showMoods moods = intercalate ";" (map show moods)
 
 nextDay :: Day -> Day
 nextDay day = day { date = Cal.addDays 1 (date day)

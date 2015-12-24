@@ -50,7 +50,7 @@ monday :: Cal.Day
 monday = Cal.fromGregorian 2015 9 14
 
 orgSunday = Day { date = sunday
-                , mood = [Mood (8, strToMilTime "07:45"), Mood (7, strToMilTime "12:15"), Mood (8, strToMilTime "22:00")]
+                , mood = [Mood (8, strToMilTime "07:45", "woke up"), Mood (7, strToMilTime "12:15", "ate lunch, cleaned kitchen, napped"), Mood (8, strToMilTime "22:00", "went to bed")]
                 , pre = "good morning"
                 , post = "good night"
                 , todos = [sundayTodo, unfinishedSundayTodo]
@@ -60,30 +60,28 @@ orgSunday = Day { date = sunday
 
 orgMonday = nextDay orgSunday
 
-orgFileString = unlines [
-    "* September"
-  , "** [1/2] bills"
-  , "- [X] rent {15}"
-  , "- [ ] car {25}"
-  , ""
-  , "** <2015-09-13 Sun>-<2015-09-20 Sun>"
-  , sundayString
-  ]
+orgFileString = unlines ["* September"
+                        , "** [1/2] bills"
+                        , "- [X] rent {15}"
+                        , "- [ ] car {25}"
+                        , ""
+                        , "** <2015-09-13 Sun>-<2015-09-20 Sun>"
+                        , sundayString
+                        ]
 
-sundayString = unlines $ [
-    "*** [3/6] <2015-09-13 Sun>"
-  , ":MOOD: 8(07:45),7(12:15),8(22:00)"
-  , ":PRE: good morning"
-  , ":POST: good night"
-  , ""
-  , ":TODO: _"
-  , show sundayTodo
-  , show unfinishedSundayTodo
-  , ":CALENDAR: _"
-  , show event
-  , show endlessEvent
-  , ":HABITS: _"
-  ] ++ map show sundayHabits
+sundayString = unlines $ ["*** [3/6] <2015-09-13 Sun>"
+                         , ":MOOD: 8(07:45__woke up);7(12:15__ate lunch, cleaned kitchen, napped);8(22:00__went to bed)"
+                         , ":PRE: good morning"
+                         , ":POST: good night"
+                         , ""
+                         , ":TODO: _"
+                         , show sundayTodo
+                         , show unfinishedSundayTodo
+                         , ":CALENDAR: _"
+                         , show event
+                         , show endlessEvent
+                         , ":HABITS: _"
+                         ] ++ map show sundayHabits
 
 spec :: Spec
 spec = do
@@ -103,8 +101,8 @@ spec = do
   context "converting string to OrgDay" $ do
     describe "properties" $ do
       it "can get the string for a single-line property" $ do
-        parseProperty "mood" sundayString `shouldBe` "8(07:45),7(12:15),8(22:00)"
-        parseProperty "bogus" sundayString `shouldBe` ""
+        parseProperty "mood" sundayString `shouldBe` "8(07:45__woke up);7(12:15__ate lunch, cleaned kitchen, napped);8(22:00__went to bed)"
+        parseProperty "bogus" sundayString `shouldBe` "" -- should be Nothing
 
       it "can get the list of strings for multiline properties" $ do
         parsePropertyList "todo" sundayString `shouldBe` [show sundayTodo, show unfinishedSundayTodo]
@@ -112,14 +110,17 @@ spec = do
         parsePropertyList "habits" sundayString `shouldBe` map show sundayHabits
 
       describe "mood" $ do
-        it "can be shown" $ do
-          show (Mood (1, MilTime { hours = 7, minutes = 45 })) `shouldBe` "1(07:45)"
+        describe "instance Show" $ do
+          it "is in the format `$mood($time__$desc)`" $ do
+            show (Mood (1, MilTime { hours = 7, minutes = 45 }, "ballin'")) `shouldBe` "1(07:45__ballin')"
 
-        it "is a list of integers with a time" $ do
-          moodFromStr "8(07:45)" `shouldBe` Mood (8, MilTime { hours = 7, minutes = 45 })
-          parseMood sundayString `shouldBe` [ Mood (8, MilTime { hours = 7, minutes = 45 })
-                                            , Mood (7, MilTime { hours = 12, minutes = 15 })
-                                            , Mood (8, MilTime { hours = 22, minutes = 0 })
+        -- the semicolons are just so I can use commas in my descriptions without breaking the
+        -- splitOn in parseMood
+        it "is a (semicolon-separated) list of integers with a time and description" $ do
+          moodFromStr "8(07:45__yolo, swag)" `shouldBe` Mood (8, MilTime { hours = 7, minutes = 45 }, "yolo, swag")
+          parseMood sundayString `shouldBe` [ Mood (8, MilTime { hours = 7, minutes = 45 }, "woke up")
+                                            , Mood (7, MilTime { hours = 12, minutes = 15 }, "ate lunch, cleaned kitchen, napped")
+                                            , Mood (8, MilTime { hours = 22, minutes = 0 }, "went to bed")
                                             ]
 
       describe "pre/post" $ do
